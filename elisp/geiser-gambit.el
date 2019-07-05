@@ -43,7 +43,7 @@
 ;; structure of the methode and then define the method
 ;; with a defcustom: define a variable that represents an option users might want to set
 (geiser-custom--defcustom geiser-gambit-binary
-  (cond ((eq system-type 'windows-nt) '("gsi.exe")) ;; not sure if the -:c is ok here
+  (cond ((eq system-type 'windows-nt) '("gsi.exe"))
         ((eq system-type 'darwin) "gsi")
         (t "gsi"))
   "Name to use to call the gambit executable when starting a REPL."
@@ -86,10 +86,7 @@ this variable to t."
   :type 'boolean
   :group 'geiser-gambit)
 
-
-
 ;; TODO path for debugger and debugging functions
-
 
 ;;; REPL support:
 
@@ -113,7 +110,7 @@ this variable to t."
 
 (defun geiser-gambit--parameters () '("-:d-")) ;; uses -:d to pipe to stdin and stdout
 
-(defconst geiser-gambit--prompt-regexp "[0-9]*> ")
+(defconst geiser-gambit--prompt-regexp "(?:[0-9])?*> ")
 
 ;;; Evaluation support:
 (defun geiser-gambit--geiser-procedure (proc &rest args)
