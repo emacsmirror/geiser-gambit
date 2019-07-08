@@ -32,7 +32,7 @@
 (eval-when-compile (require 'cl))
 
 (defconst geiser-gambit-builtin-keywords
-  '("##debug-repl"))
+  '("##debug-repl" "##import"))
 
 ;;; Customization
 
@@ -124,20 +124,9 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 
 ;;; Evaluation support:
 (defun geiser-gambit--geiser-procedure (proc &rest args)
-  (let ((fmt
-         (case proc
-           ((eval compile)
-            (let ((form (mapconcat 'identity (cdr args) " ")))
-              (format ",geiser-eval %s %s" (or (car args) "#f") form)))
-           ((load-file compile-file)
-            (format ",geiser-load-file %s" (car args)))
-           ((no-values)
-            ",geiser-no-values")
-           (t
-            (let ((form (mapconcat 'identity args " ")))
-              (format "(geiser-%s %s)" proc form))))))
-    ;;(message fmt)
-    fmt))
+  (case proc
+    ((eval compile)
+     (let* ((form (mapconcat 
 
 (defconst geiser-gambit--module-re
   "( *module +\\(([^)]+)\\|[^ ]+\\)\\|( *define-library +\\(([^)]+)\\|[^ ]+\\)")
@@ -299,15 +288,15 @@ If `t', Geiser will use `next-error' to jump to the error's location."
   (interactive)
   (geiser-connect 'gambit))
 
-;;(defun geiser-gambit--startup (remote)
-;;  (compilation-setup t)
-;;  (let ((geiser-log-verbose-p t)
-;;        (geiser-gambit-load-file (expand-file-name "gambit/geiser/gambit.scm" geiser-scheme-dir)))
-;;    (if geiser-gambit-compile-geiser-p
-;;      (geiser-eval--send/wait (format "(use utils)(compile-file \"%s\")(import geiser)"
-;;                                      geiser-gambit-load-file))
-;;      (geiser-eval--send/wait (format "(load \"%s\")"
-;;                                      geiser-gambit-load-file)))))
+(defun geiser-gambit--startup (remote)
+  (compilation-setup t)
+  (let ((geiser-log-verbose-p t)
+        (geiser-gambit-load-file (expand-file-name "gambit/geiser/gambit.scm" geiser-scheme-dir)))
+    (if geiser-gambit-compile-geiser-p
+      (geiser-eval--send/wait (format "(use utils)(compile-file \"%s\")(import geiser)"
+                                      geiser-gambit-load-file))
+      (geiser-eval--send/wait (format "(load \"%s\")"
+                                      geiser-gambit-load-file)))))
 
 ;;; Implementation definition:
 
@@ -317,7 +306,7 @@ If `t', Geiser will use `next-error' to jump to the error's location."
   (arglist geiser-gambit--parameters)
   (version-command geiser-gambit--version)
   (minimum-version geiser-gambit-minimum-version)
-;;  (repl-startup geiser-gambit--startup)
+  (repl-startup geiser-gambit--startup)
   (prompt-regexp geiser-gambit--prompt-regexp)
   (debugger-prompt-regexp geiser-gambit--debugger-prompt-regexp)
   (enter-debugger geiser-gambit--enter-debugger)
