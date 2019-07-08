@@ -14,6 +14,9 @@
 ;; Gambit in geiser, thank you to Chris Blom for the start he did few years ago
 ;; https://github.com/ChrisBlom
 
+;; TODO
+;; [ ] the gambit guessing words lists 
+
 (require 'geiser-connection)
 (require 'geiser-syntax)
 (require 'geiser-custom)
@@ -44,7 +47,6 @@
 ;; with a defcustom: define a variable that represents an option users might want to set
 (geiser-custom--defcustom geiser-gambit-binary
   (cond ((eq system-type 'windows-nt) '("gsi.exe"))
-        ((eq system-type 'darwin) "gsi")
         (t "gsi"))
   "Name to use to call the gambit executable when starting a REPL."
   :type '(choice string (repeat string))
@@ -95,22 +97,30 @@ this variable to t."
       (car geiser-gambit-binary)
     geiser-gambit-binary))
 
-;;(defun geiser-gambit--parameters ()
-;;  "Return a list with all parameters needed to start Gambit.
-;;This function uses `geiser-gambit-init-file' if it exists."
-;;;;  (let ((init-file (and (stringp geiser-gambit-init-file)
-;;;;                        (expand-file-name geiser-gambit-init-file)))
-;;;;        (n-flags (and (not geiser-gambit-load-init-file-p) '("-n"))))
-;;;;  `(,@(and (listp geiser-gambit-binary) (cdr geiser-gambit-binary))
-;;;;    ,@n-flags "-include-path" ,(expand-file-name "gambit/" geiser-scheme-dir)
-;;;;    ,@(apply 'append (mapcar (lambda (p) (list "-include-path" p))
-;;;;                             geiser-gambit-load-path))
-;;;;    ,@(and init-file (file-readable-p init-file) (list init-file)))))
-;;  `("-I" ,(expand-file-name "gambit/geiser/" geiser-scheme-dir)))
+(defun geiser-gambit--parameters ()
+  "Return a list with all parameters needed to start Gambit Scheme."
+  '("-:d-"))
 
-(defun geiser-gambit--parameters () '("-:d-")) ;; uses -:d to pipe to stdin and stdout
+(defconst geiser-gambit--prompt-regexp "> ")
 
-(defconst geiser-gambit--prompt-regexp "(?:[0-9])?*> ")
+(defconst geiser-gambit--debugger-prompt-regexp "[0-9]+> ")
+;; taken from gerbil scheme
+(geiser-custom--defcustom geiser-gambit-debug-show-bt-p t
+  "Whether to autmatically show a full backtrace when entering the debugger.
+If `nil', only the last frame is shown."
+  :type 'boolean
+  :group 'geiser-gambit)
+
+(geiser-custom--defcustom geiser-gambit-show-debug-help-p t
+  "Whether to show brief help in the echo area when entering the debugger."
+  :type 'boolean
+  :group 'geiser-gambit)
+
+(geiser-custom--defcustom geiser-gambit-jump-on-debug-p nil
+  "Whether to autmatically jump to error when entering the debugger.
+If `t', Geiser will use `next-error' to jump to the error's location."
+  :type 'boolean
+  :group 'geiser-gambit)
 
 ;;; Evaluation support:
 (defun geiser-gambit--geiser-procedure (proc &rest args)
@@ -139,27 +149,30 @@ this variable to t."
                          (t (format "%s" module)))))
       (and module (format fmt module)))))
 
-(defun geiser-gambit--get-module (&optional module)
-  (cond ((null module)
-         (save-excursion
-           (geiser-syntax--pop-to-top)
-           (if (or (re-search-backward geiser-gambit--module-re nil t)
-                   (looking-at geiser-gambit--library-re)
-                   (re-search-forward geiser-gambit--module-re nil t))
-               (geiser-gambit--get-module (match-string-no-properties 1))
-             :f)))
-        ((listp module) module)
-        ((stringp module)
-         (condition-case nil
-             (car (geiser-syntax--read-from-string module))
-           (error :f)))
-        (t :f)))
+;; not supported by gambit
+;;
+;;(defun geiser-gambit--get-module (&optional module)
+;;  (cond ((null module)
+;;         (save-excursion
+;;           (geiser-syntax--pop-to-top)
+;;           (if (or (re-search-backward geiser-gambit--module-re nil t)
+;;                   (looking-at geiser-gambit--library-re)
+;;                   (re-search-forward geiser-gambit--module-re nil t))
+;;               (geiser-gambit--get-module (match-string-no-properties 1))
+;;             :f)))
+;;        ((listp module) module)
+;;        ((stringp module)
+;;         (condition-case nil
+;;             (car (geiser-syntax--read-from-string module))
+;;           (error :f)))
+;;        (t :f)))
 
-(defun geiser-gambit--import-command (module)
-  (geiser-gambit--module-cmd module ",use %s"))
+;;(defun geiser-gambit--import-command (module)
+;;  (geiser-gambit--module-cmd module ",use %s"))
 
-(defun geiser-gambit--enter-command (module)
-  (geiser-gambit--module-cmd module ",m %s" module))
+;; not implemented by gambit for the moment
+;;(defun geiser-gambit--enter-command (module)
+;;  (geiser-gambit--module-cmd module ",m %s" module))
 
 (defun geiser-gambit--exit-command () ",q")
 
@@ -185,6 +198,20 @@ this variable to t."
     (geiser-edit--buttonize-files))
   (and (not key) msg (not (zerop (length msg)))))
 
+;; TODO not sure
+(defun geiser-gambit--enter-debugger ()
+  (let ((bt-cmd (if geiser-gambit-debug-show-bt-p "\n#||#,b\n" "")))
+    (compilation-forget-errors)
+    (goto-char (point-max))
+    (geiser-repl--prepare-send)
+    (comint-send-string nil bt-cmd)
+    (when geiser-gambit-show-debug-help-p
+      (message "Debug REPL. Enter ,t to return to top level, ,? for help."))
+    (when geiser-gambit-jump-on-debug-p
+      (accept-process-output (get-buffer-process (current-buffer))
+                             0.2 nil t)
+      (ignore-errors (next-error)))))
+
 ;;; Trying to ascertain whether a buffer is Gambit Scheme:
 
 (defconst geiser-gambit--guess-re
@@ -195,9 +222,10 @@ this variable to t."
     (goto-char (point-min))
     (re-search-forward geiser-gambit--guess-re nil t)))
 
-(defun geiser-gambit--external-help (id module)
-  "Loads gambit doc into a buffer"
-  (browse-url (format "http://api.call-cc.org/cdoc?q=%s&query-name=Look+up" id)))
+;; no help at the moment TODO
+;; (defun geiser-gambit--external-help (id module)
+;;  "Loads gambit doc into a buffer"
+;;  (browse-url (format "http://api.call-cc.org/cdoc?q=%s&query-name=Look+up" id)))
 
 ;;; Keywords and syntax
 
@@ -260,7 +288,7 @@ this variable to t."
 
 ;;; REPL startup
 
-(defconst geiser-gambit-minimum-version "v4.7.3")
+(defconst geiser-gambit-minimum-version "v4.9.3")
 
 (defun geiser-gambit--version (binary)
   (shell-command-to-string (format "%s -e \"(display (##system-version-string))\""
@@ -271,15 +299,15 @@ this variable to t."
   (interactive)
   (geiser-connect 'gambit))
 
-(defun geiser-gambit--startup (remote)
-  (compilation-setup t)
-  (let ((geiser-log-verbose-p t)
-        (geiser-gambit-load-file (expand-file-name "gambit/geiser/emacs.scm" geiser-scheme-dir)))
-    (if geiser-gambit-compile-geiser-p
-      (geiser-eval--send/wait (format "(use utils)(compile-file \"%s\")(import geiser)"
-                                      geiser-gambit-load-file))
-      (geiser-eval--send/wait (format "(load \"%s\")"
-                                      geiser-gambit-load-file)))))
+;;(defun geiser-gambit--startup (remote)
+;;  (compilation-setup t)
+;;  (let ((geiser-log-verbose-p t)
+;;        (geiser-gambit-load-file (expand-file-name "gambit/geiser/gambit.scm" geiser-scheme-dir)))
+;;    (if geiser-gambit-compile-geiser-p
+;;      (geiser-eval--send/wait (format "(use utils)(compile-file \"%s\")(import geiser)"
+;;                                      geiser-gambit-load-file))
+;;      (geiser-eval--send/wait (format "(load \"%s\")"
+;;                                      geiser-gambit-load-file)))))
 
 ;;; Implementation definition:
 
@@ -289,18 +317,18 @@ this variable to t."
   (arglist geiser-gambit--parameters)
   (version-command geiser-gambit--version)
   (minimum-version geiser-gambit-minimum-version)
-  (repl-startup geiser-gambit--startup)
+;;  (repl-startup geiser-gambit--startup)
   (prompt-regexp geiser-gambit--prompt-regexp)
-  (debugger-prompt-regexp nil)
-  (enter-debugger nil)
+  (debugger-prompt-regexp geiser-gambit--debugger-prompt-regexp)
+  (enter-debugger geiser-gambit--enter-debugger)
   (marshall-procedure geiser-gambit--geiser-procedure)
-  (find-module geiser-gambit--get-module)
-  (enter-command geiser-gambit--enter-command)
+;;  (find-module geiser-gambit--get-module)
+;;  (enter-command geiser-gambit--enter-command)
   (exit-command geiser-gambit--exit-command)
-  (import-command geiser-gambit--import-command)
+;;  (import-command geiser-gambit--import-command)
   (find-symbol-begin geiser-gambit--symbol-begin)
   (display-error geiser-gambit--display-error)
-  (external-help geiser-gambit--external-help)
+;;  (external-help geiser-gambit--external-help)
   (check-buffer geiser-gambit--guess)
   (keywords geiser-gambit--keywords)
   (case-sensitive geiser-gambit-case-sensitive-p))
@@ -311,5 +339,4 @@ this variable to t."
 (geiser-impl--add-to-alist 'regexp "\\.setup$" 'gambit t)
 
 (provide 'geiser-gambit)
-
 
