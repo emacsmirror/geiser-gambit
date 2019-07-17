@@ -15,7 +15,7 @@
 ;; https://github.com/ChrisBlom
 
 ;; TODO
-;; [ ] the gambit guessing words lists 
+;; [ ] the gambit guessing words lists
 
 (require 'geiser-connection)
 (require 'geiser-syntax)
@@ -31,8 +31,8 @@
 
 (eval-when-compile (require 'cl))
 
-(defconst geiser-gambit-builtin-keywords
-  '("##debug-repl" "##import"))
+ (defconst geiser-gambit--builtin-keywords
+   '("##debug-repl" "##import"))
 
 ;;; Customization
 
@@ -99,7 +99,7 @@ this variable to t."
 
 (defun geiser-gambit--parameters ()
   "Return a list with all parameters needed to start Gambit Scheme."
-  '("-:d-"))
+  `( ,(expand-file-name "gambit/geiser/gambit.scm" geiser-scheme-dir) "-" ))
 
 (defconst geiser-gambit--prompt-regexp "> ")
 
@@ -126,17 +126,33 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 (defun geiser-gambit--geiser-procedure (proc &rest args)
   (case proc
     ((eval compile)
-     (let* ((form (mapconcat 
+     (let* ((form (mapconcat 'identity (cdr args) " "))
+            (module (cond ((string-equal "'()" (car args))
+                           "'()")
+                          ((and (car args) (not (string-prefix-p "'" (car args)))
+                                (not (string-prefix-p "#" (car args))))
+                           (concat "'" (car args)))
+                          (t
+                           "#f")))
+            (cmd (format "(geiser:eval %s '%s)" module form)))
+       cmd))
+    ((load-file compile-file)
+     (format "(geiser:load-file %s)" (car args)))
+    ((no-values)
+     "(geiser:no-values)")
+    (t
+     (let ((form (mapconcat 'identity args " ")))
+       (format "(geiser:%s %s)" proc form)))))
 
-(defconst geiser-gambit--module-re
-  "( *module +\\(([^)]+)\\|[^ ]+\\)\\|( *define-library +\\(([^)]+)\\|[^ ]+\\)")
+;;(defconst geiser-gambit--module-re
+;;  "( *module +\\(([^)]+)\\|[^ ]+\\)\\|( *define-library +\\(([^)]+)\\|[^ ]+\\)")
 
-(defun geiser-gambit--module-cmd (module fmt &optional def)
-  (when module
-    (let* ((module (geiser-gambit--get-module module))
-           (module (cond ((or (null module) (eq module :f)) def)
-                         (t (format "%s" module)))))
-      (and module (format fmt module)))))
+;;(defun geiser-gambit--module-cmd (module fmt &optional def)
+;; (when module
+;;    (let* ((module (geiser-gambit--get-module module))
+;;           (module (cond ((or (null module) (eq module :f)) def)
+;;                         (t (format "%s" module)))))
+;;      (and module (format fmt module)))))
 
 ;; not supported by gambit
 ;;
@@ -203,8 +219,8 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 
 ;;; Trying to ascertain whether a buffer is Gambit Scheme:
 
-(defconst geiser-gambit--guess-re
-  (regexp-opt (append '("gsi" "gambit") geiser-gambit-builtin-keywords)))
+ (defconst geiser-gambit--guess-re
+   (regexp-opt (append '("gsi" "gambit") geiser-gambit--builtin-keywords)))
 
 (defun geiser-gambit--guess ()
   (save-excursion
@@ -218,8 +234,8 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 
 ;;; Keywords and syntax
 
-(defun geiser-gambit--keywords ()
-  `((,(format "[[(]%s\\>" (regexp-opt geiser-gambit-builtin-keywords 1)) . 1)))
+ (defun geiser-gambit--keywords ()
+   `(geiser-gambit--builtin-keywords))
 
 (geiser-syntax--scheme-indent
  (receive 2)
@@ -289,19 +305,12 @@ If `t', Geiser will use `next-error' to jump to the error's location."
   (geiser-connect 'gambit))
 
 (defun geiser-gambit--startup (remote)
-  (compilation-setup t)
-  (let ((geiser-log-verbose-p t)
-        (geiser-gambit-load-file (expand-file-name "gambit/geiser/gambit.scm" geiser-scheme-dir)))
-    (if geiser-gambit-compile-geiser-p
-      (geiser-eval--send/wait (format "(use utils)(compile-file \"%s\")(import geiser)"
-                                      geiser-gambit-load-file))
-      (geiser-eval--send/wait (format "(load \"%s\")"
-                                      geiser-gambit-load-file)))))
-
+    (compilation-setup t))
 ;;; Implementation definition:
 
 (define-geiser-implementation gambit
-  (unsupported-procedures '(callers callees generic-methods))
+  (unsupported-procedures '(callers callees generic-methods module-completions
+                            module-location symbol-documentation))
   (binary geiser-gambit--binary)
   (arglist geiser-gambit--parameters)
   (version-command geiser-gambit--version)
@@ -323,9 +332,6 @@ If `t', Geiser will use `next-error' to jump to the error's location."
   (case-sensitive geiser-gambit-case-sensitive-p))
 
 (geiser-impl--add-to-alist 'regexp "\\.scm$" 'gambit t)
-(geiser-impl--add-to-alist 'regexp "\\.release-info$" 'gambit t)
-(geiser-impl--add-to-alist 'regexp "\\.meta$" 'gambit t)
-(geiser-impl--add-to-alist 'regexp "\\.setup$" 'gambit t)
 
 (provide 'geiser-gambit)
 
