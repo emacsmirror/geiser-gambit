@@ -309,7 +309,7 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 ;;; Implementation definition:
 
 (define-geiser-implementation gambit
-  (unsupported-procedures '(callers callees generic-methods module-completions
+  (unsupported-procedures '(callers callees generic-methods
                             module-location symbol-documentation))
   (binary geiser-gambit--binary)
   (arglist geiser-gambit--parameters)
