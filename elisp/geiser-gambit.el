@@ -182,7 +182,7 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 (defun geiser-gambit--exit-command () ",q")
 
 (defun geiser-gambit--symbol-begin (module)
-  (save-excursion (skip-syntax-backward "^-()>") (point)))
+  (save-excursion (skip-syntax-backward "^-()> ") (point)))
 
 (defun geiser-gambit--version (binary)
   (car (process-lines binary "-c" "(display (version))")))
@@ -235,7 +235,7 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 ;;; Keywords and syntax
 
  (defun geiser-gambit--keywords ()
-   `(geiser-gambit--builtin-keywords))
+   `(,geiser-gambit--builtin-keywords))
 
 (geiser-syntax--scheme-indent
  (receive 2)

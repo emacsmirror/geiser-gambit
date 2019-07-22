@@ -262,6 +262,7 @@
     (datum-parsing-exception?
      ("args" (("required" obj) ("optional") ("key")))("module"))
     (deadlock-exception? ("args" (("required" obj) ("optional") ("key")))("module"))
+    (define ("args" (("required") ("optional" ...) ("key")))("module"))
     (delay ("args" (("required" expression) ("optional") ("key")))("module"))
     (delete-directory ("args" (("required" path) ("optional") ("key")))("module"))
     (delete-file ("args" (("required" path) ("optional") ("key")))("module"))
