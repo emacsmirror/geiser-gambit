@@ -63,7 +63,7 @@
              ;;(pp "-----NEXT1--key---")
              (cons (reverse result) lst))
             (else (loop (cdr lst) (cons (car lst) result))))))
-  
+
   (define (get-optional lst)
     ;;(pp "getopt")
     ;;(pp lst)
@@ -85,7 +85,7 @@
              ;;(pp (cons (reverse (cons '... result)) '()))
              ;;(pp "-------next2---- rest--")
              (cons (reverse (cons '... result)) '()))
-            (else 
+            (else
              (loop (cdr lst) (cons (if (pair? (car lst)) (caar lst) (car lst)) result))))))
 
   (define (get-key lst)
@@ -96,8 +96,8 @@
             ((eq? (car lst) #!rest)
              (reverse (cons '... result)))
             (else (loop (cdr lst) (cons (car lst) result))))))
-  
- 
+
+
   (let ((proc (##global-var-ref (##make-global-var method-name))))
     (if (procedure? proc)
         (let ((method-tester (##decompile proc)))
@@ -125,7 +125,6 @@
                  (symbols-list '()))
         (if (< i sym-len)
             (let ((sym (vector-ref sym-tab i)))
-              (pp sym)
               (loop (+ i 1)
                     (if (symbol? sym)
                         (let loop2 ((sym-list (if (and (##string-prefix? prefix sym)
@@ -134,7 +133,6 @@
                                                   symbols-list))
                                     (vect sym))
                           (let ((sym2 (##vector-ref vect 2)))
-                            (pp sym2)
                             (if (symbol? sym2)
                                 (if (and (##string-prefix? prefix sym2)
                                          (procedure? (##global-var-ref (##make-global-var sym))))
@@ -143,7 +141,7 @@
                                   sym-list)))
                         symbols-list)))
             symbols-list))))
-  
+
   (##sort-list (environment-symbols) string-ci<?))
 
  ;; (##sort-list (filter (lambda (el)
@@ -168,7 +166,7 @@
 ;; filter
 (define (filter f lst)
   (fold-right (lambda (e r) (if (f e) (cons e r) r)) '() lst))
-        
+
 ;; sorting algorithms
 (define (##sort-list l <?)
 
@@ -195,7 +193,7 @@
          (merge l1 l2))))
 
    (mergesort l))
- 
+
 ;; the majority of gambit and r5rs procedures correctly formatted
 (define ##gambit-procedures
   '((* ("args" (("required") ("optional" [z1  ...]) ("key")))("module"))
@@ -1146,14 +1144,14 @@
 ;;          (current-input-port in)
 ;;          (current-output-port out)
 ;;          (current-error-port out)
-;;          
+;;
 ;;          (repl)))
-;;    
+;;
 ;;    (thread-start! (make-thread remote-repl))
-;;    
+;;
 ;;    (write-to-log `(geiser-start-server . ,rest))
 ;;    (write-to-log `(port ,port))
-;; 
+;;
 ;;    (write `(port ,port))
 ;;    (newline)))
 
