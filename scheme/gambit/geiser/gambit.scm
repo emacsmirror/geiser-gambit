@@ -1,5 +1,9 @@
 ;; scheme
 ;;; gambit.scm gambit geiser interaction
+(##namespace ("gambit/geiser#")) ;; in gambit/geiser#
+(##include "~~lib/_prim#.scm")   ;; map fx+ to ##fx+, etc
+(##include "~~lib/_gambit#.scm") ;; for macro-check-string,
+;; macro-absent-obj, etc
 
 (define-macro (geiser:capture-output x . xs)
   (let ((out (gensym))
@@ -28,8 +32,8 @@
 
 ;; search for a procedure in gambit-procedures
 ;; returns the procedure symbol if it finds it
-(define (##procedure-search elem)
-  (or (assq elem ##gambit-procedures) '()))
+(define (procedure-search elem)
+  (or (assq elem gambit-procedures) '()))
 
 (define (geiser:autodoc ids . rest)
   (cond ((null? ids) '())
@@ -43,47 +47,29 @@
 
 ;; (cadr (##decompile method)) format is
 ;;(#!optional (param1 (macro-absent-obj)) (param2 (macro-absent-obj)) #!rest others)
-;; !! method-name -> procedure
-
-;;
+;;the autodoc verify if (##decompile method) gives a acceptable result and else use the scraped list gambit-procedures
 (define (geiser:new-autodoc method-name)
   (define (get-required lst)
     (let loop ((lst lst)
                (result '()))
       (cond ((not (pair? lst))
-             ;;(pp (cons (reverse result) '()))
-             ;;(pp "-----NEXT1-- not pair--")
              (cons (reverse result) '()))
             ((eq? (car lst) #!optional)
-             ;;(pp (cons (reverse result) (cdr lst)))
-             ;;(pp "-----NEXT1---opt--")
              (cons (reverse result) (cdr lst)))
             ((eq? (car lst) #!key)
-             ;;(pp (cons (reverse result) lst))
-             ;;(pp "-----NEXT1--key---")
              (cons (reverse result) lst))
             (else (loop (cdr lst) (cons (car lst) result))))))
 
   (define (get-optional lst)
-    ;;(pp "getopt")
-    ;;(pp lst)
-    ;;(pp "----")
     (let loop ((lst lst)
                (result '()))
       (cond ((or (not (pair? lst))
                  (eq? (car lst) #!key))
-             ;;(pp (cons (reverse result)
-             ;;      (if (pair? lst)
-             ;;          (cdr lst)
-             ;;          '())))
-             ;;(pp "------next2----key or emptylist--")
              (cons (reverse result)
                    (if (pair? lst)
                        (cdr lst)
                        '())))
             ((eq? (car lst) #!rest)
-             ;;(pp (cons (reverse (cons '... result)) '()))
-             ;;(pp "-------next2---- rest--")
              (cons (reverse (cons '... result)) '()))
             (else
              (loop (cdr lst) (cons (if (pair? (car lst)) (caar lst) (car lst)) result))))))
@@ -101,8 +87,6 @@
   (let ((proc (##global-var-ref (##make-global-var method-name))))
     (if (procedure? proc)
         (let ((method-tester (##decompile proc)))
-          ;;(pp (cadr method-tester))
-          ;;(pp "---NEXT---")
           (if (pair? method-tester)
               (let* ((method (cadr method-tester))
                      (required (get-required method))
@@ -113,8 +97,8 @@
                                  ("optional" ,@(car optional))
                                  ("key"      ,@key)))
                         ("module"))))
-              (list (##procedure-search method-name))))
-        (list (##procedure-search method-name)))))
+              (list (procedure-search method-name))))
+        (list (procedure-search method-name)))))
 
 (define (geiser:module-completions prefix . rest)
 
@@ -127,14 +111,14 @@
             (let ((sym (vector-ref sym-tab i)))
               (loop (+ i 1)
                     (if (symbol? sym)
-                        (let loop2 ((sym-list (if (and (##string-prefix? prefix sym)
+                        (let loop2 ((sym-list (if (and (string-prefix? prefix sym)
                                                        (procedure? (##global-var-ref (##make-global-var sym))))
                                                   (cons (symbol->string sym) symbols-list)
                                                   symbols-list))
                                     (vect sym))
                           (let ((sym2 (##vector-ref vect 2)))
                             (if (symbol? sym2)
-                                (if (and (##string-prefix? prefix sym2)
+                                (if (and (string-prefix? prefix sym2)
                                          (procedure? (##global-var-ref (##make-global-var sym))))
                                     (loop2 (cons (symbol->string sym2) sym-list) sym2)
                                     (loop2 sym-list sym2))
@@ -142,18 +126,13 @@
                         symbols-list)))
             symbols-list))))
 
-  (##sort-list (environment-symbols) string-ci<?))
-
- ;; (##sort-list (filter (lambda (el)
- ;;                        (##string-prefix? prefix el)) ;; eviter le map -> symbol->string externe
- ;;                      (map symbol->string (environment-symbols)))
- ;;              string-ci<?))
+  (sort-list (environment-symbols) string-ci<?))
 
 (define (geiser:completions prefix . rest)
   rest)
 
 ;; string-prefix function
-(define (##string-prefix? pref str)
+(define (string-prefix? pref str)
   (let* ((str (if (string? str) str (symbol->string str)))
          (str-len (string-length str))
          (pref (if (string? pref) pref (symbol->string pref)))
@@ -168,7 +147,7 @@
   (fold-right (lambda (e r) (if (f e) (cons e r) r)) '() lst))
 
 ;; sorting algorithms
-(define (##sort-list l <?)
+(define (sort-list l <?)
 
    (define (mergesort l)
 
@@ -195,7 +174,7 @@
    (mergesort l))
 
 ;; the majority of gambit and r5rs procedures correctly formatted
-(define ##gambit-procedures
+(define gambit-procedures
   '((* ("args" (("required") ("optional" [z1  ...]) ("key")))("module"))
     (+ ("args" (("required" z1  [...]) ("optional") ("key")))("module"))
     (- ("args" (("required" z1 z2) ("optional") ("key")))("module"))

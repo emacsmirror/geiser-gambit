@@ -32,7 +32,7 @@
 (eval-when-compile (require 'cl))
 
  (defconst geiser-gambit--builtin-keywords
-   '("##debug-repl" "##import"))
+   '("##debug-repl" "##import" "define-macro" "##symbol-table" "##decompile"))
 
 ;;; Customization
 
@@ -97,10 +97,6 @@ this variable to t."
       (car geiser-gambit-binary)
     geiser-gambit-binary))
 
-(defun geiser-gambit--parameters ()
-  "Return a list with all parameters needed to start Gambit Scheme."
-  `( ,(expand-file-name "gambit/geiser/gambit.scm" geiser-scheme-dir) "-" ))
-
 (defconst geiser-gambit--prompt-regexp "> ")
 
 (defconst geiser-gambit--debugger-prompt-regexp "[0-9]+> ")
@@ -122,7 +118,8 @@ If `t', Geiser will use `next-error' to jump to the error's location."
   :type 'boolean
   :group 'geiser-gambit)
 
-;;; Evaluation support:
+;;; evaluation support when module loaded at opening
+;;; the gambit/geiser# is the namespace of geiser module for gambit
 (defun geiser-gambit--geiser-procedure (proc &rest args)
   (case proc
     ((eval compile)
@@ -134,15 +131,15 @@ If `t', Geiser will use `next-error' to jump to the error's location."
                            (concat "'" (car args)))
                           (t
                            "#f")))
-            (cmd (format "(geiser:eval %s '%s)" module form)))
+            (cmd (format "(gambit/geiser#geiser:eval %s '%s)" module form)))
        cmd))
     ((load-file compile-file)
-     (format "(geiser:load-file %s)" (car args)))
+     (format "(gambit/geiser#geiser:load-file %s)" (car args)))
     ((no-values)
-     "(geiser:no-values)")
+     "(gambit/geiser#geiser:no-values)")
     (t
      (let ((form (mapconcat 'identity args " ")))
-       (format "(geiser:%s %s)" proc form)))))
+       (format "(gambit/geiser#geiser:%s %s)" proc form)))))
 
 ;;(defconst geiser-gambit--module-re
 ;;  "( *module +\\(([^)]+)\\|[^ ]+\\)\\|( *define-library +\\(([^)]+)\\|[^ ]+\\)")
@@ -183,9 +180,6 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 
 (defun geiser-gambit--symbol-begin (module)
   (save-excursion (skip-syntax-backward "^-()> ") (point)))
-
-(defun geiser-gambit--version (binary)
-  (car (process-lines binary "-c" "(display (version))")))
 
 (defun connect-to-gambit ()
   "Start a gambit REPL connected to a remote process."
@@ -285,7 +279,6 @@ If `t', Geiser will use `next-error' to jump to the error's location."
  (define-record 1)
  (define-specialization 1)
  (define-type 1)
- (with-input-from-pipe 1)
  (select 1)
  (functor 3)
  (define-interface 1)
@@ -298,6 +291,17 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 (defun geiser-gambit--version (binary)
   (shell-command-to-string (format "%s -e \"(display (##system-version-string))\""
                                    binary)))
+
+(defun geiser-gambit--parameters ()
+  "Return a list with all parameters needed to start Gambit Scheme."
+  ;; if your version of gambit support modules we directly load geiser module
+  ;; else we go load the file in geiser
+  (let* ((v (geiser-gambit--version (geiser-gambit--binary)))
+         (gambit-version (substring v 1 (string-width v))))
+    (if (version< gambit-version "4.9.3")
+        `( ,(expand-file-name "gambit/geiser/gambit" geiser-scheme-dir) "-" )
+      `( "gambit/geiser" "-"))))
+    
 
 (defun connect-to-gambit ()
   "Start a Gambit REPL connected to a remote process."
