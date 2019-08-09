@@ -1,8 +1,7 @@
 ;; scheme
 ;;; gambit.scm gambit geiser interaction
 (##namespace ("gambit/geiser#")) ;; in gambit/geiser#
-(##include "~~lib/_prim#.scm")   ;; map fx+ to ##fx+, etc
-(##include "~~lib/_gambit#.scm") ;; for macro-check-string,
+(##include "~~lib/gambit#.scm") ;; for macro-check-string,
 ;; macro-absent-obj, etc
 
 (define-macro (geiser:capture-output x . xs)

@@ -298,8 +298,8 @@ If `t', Geiser will use `next-error' to jump to the error's location."
   ;; else we go load the file in geiser
   (let* ((v (geiser-gambit--version (geiser-gambit--binary)))
          (gambit-version (substring v 1 (string-width v))))
-    (if (version< gambit-version "4.9.3")
-        `( ,(expand-file-name "gambit/geiser/gambit" geiser-scheme-dir) "-" )
+    (if (version< gambit-version "4.9.4")
+        `( ,(expand-file-name "gambit/geiser/gambit.scm" geiser-scheme-dir) "-" )
       `( "gambit/geiser" "-"))))
     
 
