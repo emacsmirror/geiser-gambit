@@ -338,4 +338,3 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 (geiser-impl--add-to-alist 'regexp "\\.scm$" 'gambit t)
 
 (provide 'geiser-gambit)
-
