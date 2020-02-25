@@ -11,11 +11,16 @@
 
 ;; Start date: Sun Mar 08, 2009 23:03
 
+;;; Commentary:
+
 ;; Gambit in geiser, thank you to Chris Blom for the start he did few years ago
 ;; https://github.com/ChrisBlom
 
 ;; TODO
 ;; [ ] the gambit guessing words lists
+
+
+;;; Code:
 
 (require 'geiser-connection)
 (require 'geiser-syntax)
