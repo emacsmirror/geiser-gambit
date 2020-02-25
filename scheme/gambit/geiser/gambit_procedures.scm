@@ -65,11 +65,11 @@
  (call-with-current-continuation
   ("args" (("required" "{proc}") ("optional") ("key")))("module"))
  (call-with-input-file
-  ("args" (("required" "{string} {proc}") ("optional") ("key")))("module"))
+     ("args" (("required" "{string} {proc}") ("optional") ("key")))("module"))
  (call-with-output-file
-  ("args" (("required" "{string} {proc}") ("optional") ("key")))("module"))
+     ("args" (("required" "{string} {proc}") ("optional") ("key")))("module"))
  (call-with-values
-  ("args" (("required" "{producer} {consumer}") ("optional") ("key")))("module"))
+     ("args" (("required" "{producer} {consumer}") ("optional") ("key")))("module"))
  (car ("args" (("required" "{pair}") ("optional") ("key")))("module"))
  (case ("args"
         (("required" "{key} {clause1} {clause2}  [...]")
@@ -197,7 +197,7 @@
        ("optional")
        ("key")))("module"))
  (dynamic-wind
-  ("args" (("required" "{before} {thunk} {after}") ("optional") ("key")))("module"))
+   ("args" (("required" "{before} {thunk} {after}") ("optional") ("key")))("module"))
  (eof-object? ("args" (("required" "{obj}") ("optional") ("key")))("module"))
  (eq? ("args" (("required" "{obj1} {obj2}") ("optional") ("key")))("module"))
  (eq?-hash ("args" (("required" "{obj}") ("optional") ("key")))("module"))
@@ -433,7 +433,7 @@
  (let-syntax ("args" (("required" "{bindings} {body}") ("optional") ("key")))("module"))
  (letrec ("args" (("required" "{bindings} {body}") ("optional") ("key")))("module"))
  (letrec-syntax
-  ("args" (("required" "{bindings} {body}") ("optional") ("key")))("module"))
+     ("args" (("required" "{bindings} {body}") ("optional") ("key")))("module"))
  (link-flat
   ("args"
    (("required"
@@ -912,13 +912,13 @@
  (with-exception-catcher
   ("args" (("required" "{handler} {thunk}") ("optional") ("key")))("module"))
  (with-exception-handler
-  ("args" (("required" "{handler} {thunk}") ("optional") ("key")))("module"))
+     ("args" (("required" "{handler} {thunk}") ("optional") ("key")))("module"))
  (with-input-from-file
-  ("args" (("required" "{string} {thunk}") ("optional") ("key")))("module"))
+     ("args" (("required" "{string} {thunk}") ("optional") ("key")))("module"))
  (with-input-from-port
-  ("args" (("required" "{port} {thunk}") ("optional") ("key")))("module"))
+     ("args" (("required" "{port} {thunk}") ("optional") ("key")))("module"))
  (with-output-to-file
-  ("args" (("required" "{string} {thunk}") ("optional") ("key")))("module"))
+     ("args" (("required" "{string} {thunk}") ("optional") ("key")))("module"))
  (write ("args" (("required" "{obj} [{port}]") ("optional") ("key")))("module"))
  (write ("args" (("required" "{obj} {port}") ("optional") ("key")))("module"))
  (write ("args" (("required" "{obj}") ("optional") ("key")))("module"))

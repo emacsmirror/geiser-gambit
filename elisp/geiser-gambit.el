@@ -36,8 +36,8 @@
 
 (eval-when-compile (require 'cl))
 
- (defconst geiser-gambit--builtin-keywords
-   '("##debug-repl" "##import" "define-macro" "##symbol-table" "##decompile"))
+(defconst geiser-gambit--builtin-keywords
+  '("##debug-repl" "##import" "define-macro" "##symbol-table" "##decompile"))
 
 ;;; Customization
 
@@ -213,8 +213,8 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 
 ;;; Trying to ascertain whether a buffer is Gambit Scheme:
 
- (defconst geiser-gambit--guess-re
-   (regexp-opt (append '("gsi" "gambit") geiser-gambit--builtin-keywords)))
+(defconst geiser-gambit--guess-re
+  (regexp-opt (append '("gsi" "gambit") geiser-gambit--builtin-keywords)))
 
 (defun geiser-gambit--guess ()
   (save-excursion
@@ -228,8 +228,8 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 
 ;;; Keywords and syntax
 
- (defun geiser-gambit--keywords ()
-   `(,geiser-gambit--builtin-keywords))
+(defun geiser-gambit--keywords ()
+  `(,geiser-gambit--builtin-keywords))
 
 (geiser-syntax--scheme-indent
  (receive 2)
@@ -301,7 +301,7 @@ If `t', Geiser will use `next-error' to jump to the error's location."
     (if (version< gambit-version "4.9.4")
         `( "-:d-" ,(expand-file-name "gambit/geiser/gambit.scm" geiser-scheme-dir) "-" )
       `("-:d-" "gambit/geiser" "-"))))
-    
+
 
 (defun connect-to-gambit ()
   "Start a Gambit REPL connected to a remote process."
@@ -309,12 +309,12 @@ If `t', Geiser will use `next-error' to jump to the error's location."
   (geiser-connect 'gambit))
 
 (defun geiser-gambit--startup (remote)
-    (compilation-setup t))
+  (compilation-setup t))
 ;;; Implementation definition:
 
 (define-geiser-implementation gambit
   (unsupported-procedures '(callers callees generic-methods
-                            module-location symbol-documentation))
+				    module-location symbol-documentation))
   (binary geiser-gambit--binary)
   (arglist geiser-gambit--parameters)
   (version-command geiser-gambit--version)
@@ -324,13 +324,13 @@ If `t', Geiser will use `next-error' to jump to the error's location."
   (debugger-prompt-regexp geiser-gambit--debugger-prompt-regexp)
   (enter-debugger geiser-gambit--enter-debugger)
   (marshall-procedure geiser-gambit--geiser-procedure)
-;;  (find-module geiser-gambit--get-module)
-;;  (enter-command geiser-gambit--enter-command)
+  ;;  (find-module geiser-gambit--get-module)
+  ;;  (enter-command geiser-gambit--enter-command)
   (exit-command geiser-gambit--exit-command)
-;;  (import-command geiser-gambit--import-command)
+  ;;  (import-command geiser-gambit--import-command)
   (find-symbol-begin geiser-gambit--symbol-begin)
   (display-error geiser-gambit--display-error)
-;;  (external-help geiser-gambit--external-help)
+  ;;  (external-help geiser-gambit--external-help)
   (check-buffer geiser-gambit--guess)
   (keywords geiser-gambit--keywords)
   (case-sensitive geiser-gambit-case-sensitive-p))

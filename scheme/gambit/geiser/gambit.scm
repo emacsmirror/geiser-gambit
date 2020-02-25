@@ -42,7 +42,7 @@
          (geiser:autodoc (cdr ids)))
         (else
          (geiser:new-autodoc (car ids)))))
-         ;;(list (##procedure-search (car ids))))))
+;;(list (##procedure-search (car ids))))))
 
 ;; (cadr (##decompile method)) format is
 ;;(#!optional (param1 (macro-absent-obj)) (param2 (macro-absent-obj)) #!rest others)
@@ -144,29 +144,29 @@
 ;; sorting algorithms
 (define (sort-list l <?)
 
-   (define (mergesort l)
+  (define (mergesort l)
 
-     (define (merge l1 l2)
-       (cond ((null? l1) l2)
-             ((null? l2) l1)
-             (else
-              (let ((e1 (car l1)) (e2 (car l2)))
-                (if (<? e1 e2)
-                  (cons e1 (merge (cdr l1) l2))
-                  (cons e2 (merge l1 (cdr l2))))))))
+    (define (merge l1 l2)
+      (cond ((null? l1) l2)
+            ((null? l2) l1)
+            (else
+             (let ((e1 (car l1)) (e2 (car l2)))
+               (if (<? e1 e2)
+                   (cons e1 (merge (cdr l1) l2))
+                   (cons e2 (merge l1 (cdr l2))))))))
 
-     (define (split l)
-       (if (or (null? l) (null? (cdr l)))
-         l
-         (cons (car l) (split (cddr l)))))
+    (define (split l)
+      (if (or (null? l) (null? (cdr l)))
+          l
+          (cons (car l) (split (cddr l)))))
 
-     (if (or (null? l) (null? (cdr l)))
-       l
-       (let* ((l1 (mergesort (split l)))
-              (l2 (mergesort (split (cdr l)))))
-         (merge l1 l2))))
+    (if (or (null? l) (null? (cdr l)))
+	l
+	(let* ((l1 (mergesort (split l)))
+               (l2 (mergesort (split (cdr l)))))
+          (merge l1 l2))))
 
-   (mergesort l))
+  (mergesort l))
 
 ;; the majority of gambit and r5rs procedures correctly formatted
 (define gambit-procedures
