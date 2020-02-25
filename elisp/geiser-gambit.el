@@ -181,11 +181,6 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 (defun geiser-gambit--symbol-begin (module)
   (save-excursion (skip-syntax-backward "^-()> ") (point)))
 
-(defun connect-to-gambit ()
-  "Start a gambit REPL connected to a remote process."
-  (interactive)
-  (geiser-connect 'gambit))
-
 ;; error display
 
 ;;; Error display
