@@ -1,4 +1,4 @@
-;; geiser-gambit.el -- gambit's implementation of the geiser protocols
+;;; geiser-gambit.el -- gambit's implementation of the geiser protocols
 
 ;; Copyright (C) 2014, 2015, 2019 Daniel Leslie
 
