@@ -34,7 +34,7 @@
 (require 'compile)
 (require 'info-look)
 
-(eval-when-compile (require 'cl))
+(eval-when-compile (require 'cl-lib))
 
 (defconst geiser-gambit--builtin-keywords
   '("##debug-repl" "##import" "define-macro" "##symbol-table" "##decompile"))
@@ -126,7 +126,7 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 ;;; evaluation support when module loaded at opening
 ;;; the gambit/geiser# is the namespace of geiser module for gambit
 (defun geiser-gambit--geiser-procedure (proc &rest args)
-  (case proc
+  (cl-case proc
     ((eval compile)
      (let* ((form (mapconcat 'identity (cdr args) " "))
             (module (cond ((string-equal "'()" (car args))
