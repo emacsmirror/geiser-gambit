@@ -1,6 +1,6 @@
 ;;; geiser-gambit.el -- gambit's implementation of the geiser protocols
 
-;; Copyright (C) 2014, 2015, 2019 Daniel Leslie
+;; Copyright (C) 2014, 2015, 2019, 2020 Daniel Leslie
 
 ;; Based on geiser-guile.el by Jose Antonio Ortega Ruiz
 
@@ -292,6 +292,10 @@ If `t', Geiser will use `next-error' to jump to the error's location."
   (shell-command-to-string (format "%s -e \"(display (##system-version-string))\""
                                    binary)))
 
+(defvar geiser-gambit-scheme-dir
+  (expand-file-name "src/" (file-name-directory load-file-name)))
+
+
 (defun geiser-gambit--parameters ()
   "Return a list with all parameters needed to start Gambit Scheme."
   ;; if your version of gambit support modules we directly load geiser module
@@ -299,7 +303,7 @@ If `t', Geiser will use `next-error' to jump to the error's location."
   (let* ((v (geiser-gambit--version (geiser-gambit--binary)))
          (gambit-version (substring v 1 (string-width v))))
     (if (version< gambit-version "4.9.4")
-        `( "-:d-" ,(expand-file-name "gambit/geiser/gambit.scm" geiser-scheme-dir) "-" )
+        `( "-:d-" ,(expand-file-name "geiser/gambit.scm" geiser-gambit-scheme-dir) "-" )
       `("-:d-" "gambit/geiser" "-"))))
 
 
