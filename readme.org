@@ -1,0 +1,8 @@
+* Gambit and Geiser talk to each other
+
+This package provides support for using [[http://gambitscheme.org/wiki/index.php/Main_Page][Gambit Scheme]]  in Emacs with
+[[http://geiser.nongnu.org][Geiser]].
+
+Provided [[https://gitlab.com/emacs-geiser/core][geiser-core]] is installed in your system, if this package's
+directory is in your load path, just add ~(require 'geiser-gambit)~ to
+your initialisation files and then ~M-x run-gambit~ to start a REPL.
