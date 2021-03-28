@@ -1,14 +1,15 @@
-;;; geiser-gambit.el -- gambit's implementation of the geiser protocols
+;;; geiser-gambit.el --- Gambit's implementation of the geiser protocols  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014, 2015, 2019, 2020 Daniel Leslie
+;; Author: Daniel Leslie
+;; Maintainer: Daniel Leslie, Jose A Ortega Ruiz <jao@gnu.org>
+;; Keywords: languages, gambit, scheme, geiser
+;; Homepage: https://gitlab.com/emacs-geiser/gambit
+;; Package-Requires: ((emacs "26.1") (geiser "0.12"))
+;; SPDX-License-Identifier: BSD-3-Clause
+;; Version: 0.13
 
+;; Copyright (C) 2014, 2015, 2019, 2020, 2021 Daniel Leslie
 ;; Based on geiser-guile.el by Jose Antonio Ortega Ruiz
-
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the Modified BSD License. You should
-;; have received a copy of the license along with this program. If
-;; not, see <http://www.xfree86.org/3.3.6/COPYRIGHT2.html#5>.
-
 ;; Start date: Sun Mar 08, 2009 23:03
 
 ;;; Commentary:
@@ -58,8 +59,7 @@
   :group 'geiser-gambit)
 
 (geiser-custom--defcustom geiser-gambit-load-path nil
-  "A list of paths to be added to gambit's load path when it's
-started."
+  "A list of paths to be added to gambit's load path when it's started."
   :type '(repeat file)
   :group 'geiser-gambit)
 
@@ -98,6 +98,7 @@ this variable to t."
 ;;; REPL support:
 
 (defun geiser-gambit--binary ()
+  "Return Gambit executable."
   (if (listp geiser-gambit-binary)
       (car geiser-gambit-binary)
     geiser-gambit-binary))
@@ -108,7 +109,7 @@ this variable to t."
 ;; taken from gerbil scheme
 (geiser-custom--defcustom geiser-gambit-debug-show-bt-p t
   "Whether to automatically show a full backtrace when entering the debugger.
-If `nil', only the last frame is shown."
+If nil, only the last frame is shown."
   :type 'boolean
   :group 'geiser-gambit)
 
@@ -119,13 +120,14 @@ If `nil', only the last frame is shown."
 
 (geiser-custom--defcustom geiser-gambit-jump-on-debug-p nil
   "Whether to automatically jump to error when entering the debugger.
-If `t', Geiser will use `next-error' to jump to the error's location."
+If t, Geiser will use `next-error' to jump to the error's location."
   :type 'boolean
   :group 'geiser-gambit)
 
 ;;; evaluation support when module loaded at opening
 ;;; the gambit/geiser# is the namespace of geiser module for gambit
 (defun geiser-gambit--geiser-procedure (proc &rest args)
+  "Transform PROC in string for a scheme procedure using ARGS."
   (cl-case proc
     ((eval compile)
      (let* ((form (mapconcat 'identity (cdr args) " "))
@@ -181,16 +183,20 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 ;;(defun geiser-gambit--enter-command (module)
 ;;  (geiser-gambit--module-cmd module ",m %s" module))
 
-(defun geiser-gambit--exit-command () ",q")
+(defun geiser-gambit--exit-command ()
+  "Return REPL exit command."
+  ",q")
 
 (defun geiser-gambit--symbol-begin (module)
+  "Return beginning of current symbol while in MODULE."
   (save-excursion (skip-syntax-backward "^-()> ") (point)))
 
 ;; error display
 
 ;;; Error display
 
-(defun geiser-gambit--display-error (module key msg)
+(defun geiser-gambit--display-error (_module key msg)
+  "Display error with given KEY and error message MSG."
   (newline)
   (when (stringp msg)
     (save-excursion (insert msg))
@@ -199,6 +205,7 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 
 ;; TODO not sure
 (defun geiser-gambit--enter-debugger ()
+  "Prepare geiser to enter Gambit's debugger."
   (let ((bt-cmd (if geiser-gambit-debug-show-bt-p "\n#||#,b\n" "")))
     (compilation-forget-errors)
     (goto-char (point-max))
@@ -217,6 +224,7 @@ If `t', Geiser will use `next-error' to jump to the error's location."
   (regexp-opt (append '("gsi" "gambit") geiser-gambit--builtin-keywords)))
 
 (defun geiser-gambit--guess ()
+  "Ascertain whether current buffer is in Gambit Scheme."
   (save-excursion
     (goto-char (point-min))
     (re-search-forward geiser-gambit--guess-re nil t)))
@@ -229,6 +237,7 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 ;;; Keywords and syntax
 
 (defun geiser-gambit--keywords ()
+  "Return Gambit-specific scheme keywords."
   `(,geiser-gambit--builtin-keywords))
 
 (geiser-syntax--scheme-indent
@@ -289,12 +298,13 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 (defconst geiser-gambit-minimum-version "v4.9.3")
 
 (defun geiser-gambit--version (binary)
+  "Use BINARY to obtain's Gambit's version."
   (shell-command-to-string (format "%s -e \"(display (##system-version-string))\""
                                    binary)))
 
 (defvar geiser-gambit-scheme-dir
-  (expand-file-name "src/" (file-name-directory load-file-name)))
-
+  (expand-file-name "src/" (file-name-directory load-file-name))
+  "Directory where the Gambit scheme geiser modules are installed.")
 
 (defun geiser-gambit--parameters ()
   "Return a list with all parameters needed to start Gambit Scheme."
@@ -306,12 +316,14 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 	`( "-:d-" ,(expand-file-name "geiser/gambit.scm" geiser-gambit-scheme-dir) "-" )
       `("-:d-" "gambit/geiser.scm" "-"))))
 
+#;;;autoload
 (defun connect-to-gambit ()
   "Start a Gambit REPL connected to a remote process."
   (interactive)
   (geiser-connect 'gambit))
 
-(defun geiser-gambit--startup (remote)
+(defun geiser-gambit--startup (_remote)
+  "Startup function."
   (compilation-setup t))
 ;;; Implementation definition:
 
@@ -341,3 +353,4 @@ If `t', Geiser will use `next-error' to jump to the error's location."
 (geiser-impl--add-to-alist 'regexp "\\.scm$" 'gambit t)
 
 (provide 'geiser-gambit)
+;;; geiser-gambit.el ends here
