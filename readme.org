@@ -26,3 +26,30 @@ In a typical shell session, these would be the precise commands:
     $ make -j
     $ make install
 #+end_example
+
+*** Using a remote REPL
+
+  If you also want to use a remote Gambit REPL:
+
+  - Enable the =gambit/geiser= module:
+    #+begin_example
+      $ mkdir ~/gambit/lib/gambit/geiser
+      $ cp ~/geiser/geiser-module/* ~/gambit/lib/geiser/
+    #+end_example
+  - Now that you have the module you start =gsi= with it, using the =-:d= option:
+    #+begin_example
+      $ gsi -:d@ gambit/geiser -
+    #+end_example
+  - You can now open emacs and call
+    #+begin_example
+      M-x geiser-connect gambit
+    #+end_example
+
+  - Enjoy!
+
+  By the way, if you are unable to use gambit modules, open =gsi= with
+  the ~gambit.scm~ file located in ~src/geiser/gambit.scm~ inside
+  geiser-gambit's installation directory; something like:
+  #+begin_example
+     gsi -:d@ ~/.emacs.d/elpa/gambit-xxxxxx/src/geiser/gambit.scm -
+  #+end_example
