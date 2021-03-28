@@ -187,7 +187,7 @@ If t, Geiser will use `next-error' to jump to the error's location."
   "Return REPL exit command."
   ",q")
 
-(defun geiser-gambit--symbol-begin (module)
+(defun geiser-gambit--symbol-begin (_module)
   "Return beginning of current symbol while in MODULE."
   (save-excursion (skip-syntax-backward "^-()> ") (point)))
 
@@ -316,7 +316,7 @@ If t, Geiser will use `next-error' to jump to the error's location."
 	`( "-:d-" ,(expand-file-name "geiser/gambit.scm" geiser-gambit-scheme-dir) "-" )
       `("-:d-" "gambit/geiser.scm" "-"))))
 
-#;;;autoload
+;;;###autoload
 (defun connect-to-gambit ()
   "Start a Gambit REPL connected to a remote process."
   (interactive)
@@ -351,6 +351,13 @@ If t, Geiser will use `next-error' to jump to the error's location."
   (case-sensitive geiser-gambit-case-sensitive-p))
 
 (geiser-impl--add-to-alist 'regexp "\\.scm$" 'gambit t)
+
+;;;###autoload
+(autoload 'run-gambit "geiser-gambit" "Start a Geiser Gambit REPL." t)
+
+;;;###autoload
+(autoload 'switch-to-gambit "geiser-gambit"
+  "Start a Geiser Gambit REPL, or switch to a running one." t)
 
 (provide 'geiser-gambit)
 ;;; geiser-gambit.el ends here
