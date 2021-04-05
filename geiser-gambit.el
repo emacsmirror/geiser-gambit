@@ -23,6 +23,7 @@
 
 ;;; Code:
 
+(require 'geiser-impl)
 (require 'geiser-connection)
 (require 'geiser-syntax)
 (require 'geiser-custom)
@@ -351,6 +352,9 @@ If t, Geiser will use `next-error' to jump to the error's location."
   (case-sensitive geiser-gambit-case-sensitive-p))
 
 (geiser-impl--add-to-alist 'regexp "\\.scm$" 'gambit t)
+
+;;;###autoload
+(geiser-activate-implementation 'gambit)
 
 ;;;###autoload
 (autoload 'run-gambit "geiser-gambit" "Start a Geiser Gambit REPL." t)
