@@ -4,9 +4,9 @@
 ;; Maintainer: Daniel Leslie, Jose A Ortega Ruiz <jao@gnu.org>
 ;; Keywords: languages, gambit, scheme, geiser
 ;; Homepage: https://gitlab.com/emacs-geiser/gambit
-;; Package-Requires: ((emacs "26.1") (geiser "0.16"))
+;; Package-Requires: ((emacs "26.1") (geiser "0.18"))
 ;; SPDX-License-Identifier: BSD-3-Clause
-;; Version: 0.16
+;; Version: 0.17
 
 ;; Copyright (C) 2014, 2015, 2019, 2020, 2021 Daniel Leslie
 ;; Based on geiser-guile.el by Jose Antonio Ortega Ruiz
@@ -350,8 +350,6 @@ If t, Geiser will use `next-error' to jump to the error's location."
   (check-buffer geiser-gambit--guess)
   (keywords geiser-gambit--keywords)
   (case-sensitive geiser-gambit-case-sensitive-p))
-
-(geiser-implementation-extension 'gambit "scm")
 
 ;;;###autoload
 (geiser-activate-implementation 'gambit)
