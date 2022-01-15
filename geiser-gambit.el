@@ -126,7 +126,7 @@ If t, Geiser will use `next-error' to jump to the error's location."
   :group 'geiser-gambit)
 
 ;;; evaluation support when module loaded at opening
-;;; the gambit/geiser# is the namespace of geiser module for gambit
+;;; the _geiser# is the namespace of geiser module for gambit
 (defun geiser-gambit--geiser-procedure (proc &rest args)
   "Transform PROC in string for a scheme procedure using ARGS."
   (cl-case proc
@@ -139,15 +139,15 @@ If t, Geiser will use `next-error' to jump to the error's location."
                            (concat "'" (car args)))
                           (t
                            "#f")))
-            (cmd (format "(gambit/geiser#geiser:eval %s '%s)" module form)))
+            (cmd (format "(_geiser#geiser:eval %s '%s)" module form)))
        cmd))
     ((load-file compile-file)
-     (format "(gambit/geiser#geiser:load-file %s)" (car args)))
+     (format "(_geiser#geiser:load-file %s)" (car args)))
     ((no-values)
-     "(gambit/geiser#geiser:no-values)")
+     "(_geiser#geiser:no-values)")
     (t
      (let ((form (mapconcat 'identity args " ")))
-       (format "(gambit/geiser#geiser:%s %s)" proc form)))))
+       (format "(_geiser#geiser:%s %s)" proc form)))))
 
 ;;(defconst geiser-gambit--module-re
 ;;  "( *module +\\(([^)]+)\\|[^ ]+\\)\\|( *define-library +\\(([^)]+)\\|[^ ]+\\)")
@@ -314,8 +314,8 @@ If t, Geiser will use `next-error' to jump to the error's location."
   (let* ((v (geiser-gambit--version (geiser-gambit--binary)))
 	 (gambit-version (geiser--cut-version v)))
     (if (version< gambit-version "4.9.4")
-	`( "-:d-" ,(expand-file-name "geiser/gambit.scm" geiser-gambit-scheme-dir) "-" )
-      `("-:d-" "gambit/geiser.scm" "-"))))
+    `( "-:d-" ,(expand-file-name "geiser/gambit.scm" geiser-gambit-scheme-dir) "-" )
+      `("-:d-" "_geiser" "-"))))
 
 ;;;###autoload
 (defun connect-to-gambit ()

@@ -1,6 +1,6 @@
 ;; scheme
 ;;; gambit.scm gambit geiser interaction
-(##namespace ("gambit/geiser#")) ;; in gambit/geiser#
+(##namespace ("_geiser#")) ;; in _geiser#
 (##include "~~lib/gambit#.scm") ;; for macro-check-string,
 ;; macro-absent-obj, etc
 
