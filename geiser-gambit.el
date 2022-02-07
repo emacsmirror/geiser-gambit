@@ -6,9 +6,9 @@
 ;; Homepage: https://gitlab.com/emacs-geiser/gambit
 ;; Package-Requires: ((emacs "26.1") (geiser "0.18"))
 ;; SPDX-License-Identifier: BSD-3-Clause
-;; Version: 0.17
+;; Version: 0.18
 
-;; Copyright (C) 2014, 2015, 2019, 2020, 2021 Daniel Leslie
+;; Copyright (C) 2014, 2015, 2019, 2020, 2021, 2022 Daniel Leslie
 ;; Based on geiser-guile.el by Jose Antonio Ortega Ruiz
 ;; Start date: Sun Mar 08, 2009 23:03
 
@@ -296,7 +296,7 @@ If t, Geiser will use `next-error' to jump to the error's location."
 
 ;;; REPL startup
 
-(defconst geiser-gambit-minimum-version "v4.9.3")
+(defconst geiser-gambit-minimum-version "v4.9.4")
 
 (defun geiser-gambit--version (binary)
   "Use BINARY to obtain's Gambit's version."
